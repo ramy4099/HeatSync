@@ -9,54 +9,59 @@
     --bg-card: #111827;
     --bg-card-hover: #162032;
     --bg-subtle: #1E293B;
-    
+
     --primary-blue: #38BDF8;
     --primary-blue-hover: #0284C7;
     --primary-blue-subtle: rgba(56, 189, 248, 0.12);
     --primary-blue-border: #0369A1;
-    
+
     --text-primary: #F8FAFC;
     --text-secondary: #CBD5E1;
     --text-muted: #94A3B8;
     --text-subtle: #64748B;
-    
+
     --border-light: #1E293B;
     --border-subtle: #162032;
     --border-strong: #334155;
-    
+
     --color-success: #10B981;
     --color-success-bg: rgba(16, 185, 129, 0.12);
     --color-success-border: rgba(16, 185, 129, 0.3);
-    
+
     --color-info: #38BDF8;
     --color-info-bg: rgba(56, 189, 248, 0.12);
     --color-info-border: rgba(56, 189, 248, 0.3);
-    
+
     --color-warning: #F59E0B;
     --color-warning-bg: rgba(245, 158, 11, 0.12);
     --color-warning-border: rgba(245, 158, 11, 0.3);
-    
+
     --color-danger: #EF4444;
     --color-danger-bg: rgba(239, 68, 68, 0.12);
     --color-danger-border: rgba(239, 68, 68, 0.3);
-    
+
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
     --radius-full: 9999px;
-    
+
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
 }
 
 /* Base Typography & Background */
-html, body, [class*="st-"] {
+html,
+body,
+[class*="st-"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
 }
 
-code, kbd, samp, pre {
+code,
+kbd,
+samp,
+pre {
     font-family: 'JetBrains Mono', monospace;
 }
 
@@ -105,11 +110,15 @@ code, kbd, samp, pre {
 
 /* KPI & Metric Cards in Dark Mode */
 .kpi-card {
-    background: rgba(255, 255, 255, 0.03); /* Glassmorphism subtle tint */
-    border: none; /* Remove harsh default borders */
-    border-radius: 8px; /* Smooth rounded corners */
+    background: rgba(255, 255, 255, 0.03);
+    /* Glassmorphism subtle tint */
+    border: none;
+    /* Remove harsh default borders */
+    border-radius: 8px;
+    /* Smooth rounded corners */
     padding: 1.1rem 1.2rem;
-    box-shadow: none; /* Remove default shadow for a flatter look */
+    box-shadow: none;
+    /* Remove default shadow for a flatter look */
     transition: background 0.2s ease, transform 0.2s ease;
     height: 100%;
     display: flex;
@@ -118,7 +127,8 @@ code, kbd, samp, pre {
 }
 
 .kpi-card:hover {
-    background: rgba(255, 255, 255, 0.05); /* Slight hover glow */
+    background: rgba(255, 255, 255, 0.05);
+    /* Slight hover glow */
 }
 
 /* Override default st.metric styling if it sneaks in */
@@ -294,6 +304,7 @@ code, kbd, samp, pre {
     font-size: 0.82rem !important;
     border-radius: 6px !important;
 }
+
 [data-testid="stSelectbox"] label {
     font-size: 0.75rem !important;
     margin-bottom: 2px !important;
@@ -348,7 +359,7 @@ code, kbd, samp, pre {
 }
 
 /* Buttons minimal styling */
-.stButton > button {
+.stButton>button {
     border-radius: var(--radius-sm);
     font-weight: 600;
     font-size: 0.85rem;
@@ -358,13 +369,13 @@ code, kbd, samp, pre {
     transition: all 0.15s ease;
 }
 
-.stButton > button:hover {
+.stButton>button:hover {
     border-color: var(--primary-blue);
     color: var(--primary-blue);
     background-color: #162032;
 }
 
-.stButton > button:focus {
+.stButton>button:focus {
     box-shadow: 0 0 0 2px var(--primary-blue-subtle);
 }
 
@@ -411,7 +422,8 @@ code, kbd, samp, pre {
 
 /* Sidebar collapse/expand button fix (Streamlit 1.34+ Support) */
 [data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebarExpandButton"] {
+[data-testid="stSidebarExpandButton"],
+[data-testid="collapsedControl"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -422,24 +434,26 @@ code, kbd, samp, pre {
     border: 1px solid #334155 !important;
     transition: background 0.15s ease, border-color 0.15s ease !important;
     box-shadow: var(--shadow-sm) !important;
-    color: transparent !important; /* Hide original broken text */
-    position: relative !important;
+    color: transparent !important;
+    /* Hide original broken text */
     overflow: hidden !important;
+    z-index: 999999 !important;
 }
 
 [data-testid="stSidebarCollapseButton"]:hover,
-[data-testid="stSidebarExpandButton"]:hover {
+[data-testid="stSidebarExpandButton"]:hover,
+[data-testid="collapsedControl"]:hover {
     background: #334155 !important;
     border-color: #38BDF8 !important;
 }
 
 /* Hide the child span that contains the broken "keyboard_double_arrow_X" text */
 [data-testid="stSidebarCollapseButton"] *,
-[data-testid="stSidebarExpandButton"] * {
+[data-testid="stSidebarExpandButton"] *,
+[data-testid="collapsedControl"] * {
     color: transparent !important;
     font-size: 0 !important;
     opacity: 0 !important;
-    pointer-events: none !important;
 }
 
 /* Inject custom chevron left for collapse */
@@ -450,19 +464,23 @@ code, kbd, samp, pre {
     line-height: 1 !important;
     position: absolute;
     display: block !important;
+    pointer-events: none !important;
 }
 
 /* Inject custom chevron right for expand */
-[data-testid="stSidebarExpandButton"]::after {
+[data-testid="stSidebarExpandButton"]::after,
+[data-testid="collapsedControl"]::after {
     content: "\203A";
     font-size: 1.6rem !important;
     color: #F8FAFC !important;
     line-height: 1 !important;
     position: absolute;
     display: block !important;
+    pointer-events: none !important;
 }
 
 /* Fix generic material icon leakage globally just in case */
-.material-icons, .material-symbols-rounded {
+.material-icons,
+.material-symbols-rounded {
     font-family: 'Material Symbols Rounded', sans-serif !important;
 }

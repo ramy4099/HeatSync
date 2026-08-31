@@ -199,39 +199,6 @@ def normalize_env_params(raw_json: dict) -> pd.DataFrame:
     else:
         df["hour"] = range(len(df))
 
-    # --- Synthesize 24-hour diurnal curve if API returned 1 row ---
-    if len(df) == 1:
-        import math
-        base_row = df.iloc[0].to_dict()
-        base_hour = base_row.get("hour", 12)
-        
-        rows = []
-        for h in range(24):
-            new_row = base_row.copy()
-            new_row["hour"] = h
-            
-            # Simple diurnal math: temperature peaks at 15:00, lowest at 03:00.
-            # Max swing +/- 5 degrees C from the base.
-            hour_diff = h - 15
-            temp_swing = 5.0 * math.cos(hour_diff * math.pi / 12.0)
-            base_swing = 5.0 * math.cos((base_hour - 15) * math.pi / 12.0)
-            
-            if "apparent_temperature_celsius" in new_row:
-                true_mean = new_row["apparent_temperature_celsius"] - base_swing
-                new_row["apparent_temperature_celsius"] = true_mean + temp_swing
-                
-            if "wet_bulb_temperature_celsius" in new_row:
-                true_mean = new_row["wet_bulb_temperature_celsius"] - (base_swing * 0.7)
-                new_row["wet_bulb_temperature_celsius"] = true_mean + (temp_swing * 0.7)
-                
-            if "relative_humidity_percent" in new_row:
-                true_mean = new_row["relative_humidity_percent"] + (base_swing * 2.0)
-                new_row["relative_humidity_percent"] = max(10.0, min(100.0, true_mean - (temp_swing * 2.0)))
-                
-            rows.append(new_row)
-            
-        df = pd.DataFrame(rows)
-
     # --- Apply fallback defaults for missing columns ------------------
     for col, default in _DEFAULTS.items():
         if col not in df.columns:
@@ -325,9 +292,43 @@ def fetch_facility_data(
 
     # Import here to avoid circular dependency at module level
     from fortyguard_client import FortyGuardClient  # noqa: E402
+    import concurrent.futures
+    import copy
 
     client = FortyGuardClient(api_key=api_key)
-    raw_result = client.get_env_params_sync(payload)
+    
+    def fetch_hour(h: int):
+        try:
+            p = dict(payload)
+            p["date_time"] = dict(payload["date_time"])
+            p["date_time"]["start_time"] = f"{h:02d}:00"
+            return client.get_env_params_sync(p)
+        except Exception as e:
+            logger.error(f"Failed to fetch hour {h:02d} for {fid_upper}: {e}")
+            return None
+
+    # Fetch 24 hours of real live data concurrently
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        raw_results = list(executor.map(fetch_hour, range(24)))
+        
+    raw_result = None
+    for res in raw_results:
+        if res is None:
+            continue
+        if raw_result is None:
+            raw_result = copy.deepcopy(res)
+        else:
+            raw_result["metadata"]["timestamps"].extend(res.get("metadata", {}).get("timestamps", []))
+            params1 = raw_result["locations"][0]["parameters"]
+            params2 = res["locations"][0].get("parameters", {})
+            for key, val_list in params2.items():
+                if key in params1:
+                    params1[key].extend(val_list)
+                else:
+                    params1[key] = val_list
+                    
+    if raw_result is None:
+        raise RuntimeError(f"Failed to fetch any live data for {fid_upper} over the 24-hour period.")
 
     # Persist to cache
     os.makedirs(DATA_DIR, exist_ok=True)
